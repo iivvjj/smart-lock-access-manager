@@ -54,6 +54,7 @@ public class MonitorController {
         // Obtener accesos asociados a las reservas
         List<Acceso> accesos = accesoService.obtenerAccesosPorReservas(reservas);
 
+        reservas.sort((r1, r2) -> r2.getFechainicio().compareTo(r1.getFechainicio()));
         // Añadir datos al modelo
         model.addAttribute("reservas", reservas);
         model.addAttribute("totalReservas", reservas.size());
