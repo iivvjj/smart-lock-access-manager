@@ -6,7 +6,7 @@ A web platform for holiday-rental managers to give guests **keyless access** to 
 
 <sub>Recorded from our end-to-end Selenium tests running against the app.</sub>
 
-> Team project (5 people, Scrum) for a course at ETSIT, Universidad Politécnica de Madrid, Feb – May 2025.
+> Team project (5 people, Scrum) for the course *Ingeniería de Sistemas y Servicios Telemáticos* at ETSIT, Universidad Politécnica de Madrid, Feb – May 2025.
 > This is my personal copy of the team repository, with the full commit history preserved and credentials removed.
 
 ## Features
@@ -20,16 +20,76 @@ A web platform for holiday-rental managers to give guests **keyless access** to 
 
 ## Architecture
 
+Three-tier client–server design. The Spring Boot backend is split into five modules, each with its own controllers, services and repositories:
+
+```mermaid
+flowchart LR
+    subgraph Clients
+        M["Manager<br/>web UI"]
+        G["Guest<br/>web UI"]
+    end
+    subgraph Backend["Spring Boot backend"]
+        AUTH["Authentication<br/>(Spring Security)"]
+        BOOK["Booking<br/>integration"]
+        ACC["Access<br/>authorization"]
+        LOCK["Lock<br/>system"]
+        MON["Monitoring &<br/>notifications"]
+    end
+    M --> AUTH
+    G --> AUTH
+    AUTH --> BOOK
+    AUTH --> ACC
+    BOOK <-->|"OAuth 2.0 · .ics"| GCAL[("Google<br/>Calendar")]
+    ACC --> LOCK
+    LOCK <-->|"WebSockets<br/>(Socket.IO)"| SIM["Lock simulator<br/>Node.js + React"]
+    LOCK --> MON
+    ACC --> MON
+    MON -->|email| MAIL[("Gmail SMTP")]
+    Backend --> DB[("MySQL")]
 ```
-┌────────────────────────────┐        WebSockets (Socket.IO)       ┌──────────────────────────┐
-│  Spring Boot web app       │ ◄──────────────────────────────────► │  Lock simulator          │
-│  Java 17 · Spring Security │        open / close / battery        │  Node.js + Express       │
-│  JPA · Thymeleaf           │                                      │  React control panel     │
-└──────────┬─────────────────┘                                      └──────────────────────────┘
-           │ JDBC                         OAuth 2.0 · Calendar API
-           ▼                                      ▼
-       MySQL                              Google Calendar
+
+### Data model
+
+```mermaid
+classDiagram
+    direction LR
+    class Gestor {
+      +Long id
+      +String email
+      +String nombre
+      +String telefono
+    }
+    class Huesped {
+      +Long id
+      +String email
+      +String nombre
+    }
+    class Reserva {
+      +Long id
+      +String pin
+      +Date fechainicio
+      +Date fechafin
+    }
+    class Cerradura {
+      +Long id
+      +String ubicacion
+      +String token
+      +Integer bateria
+    }
+    class Acceso {
+      +Long id
+      +Date horario
+      +Boolean resultado
+    }
+    Gestor "1" --> "*" Reserva : schedules
+    Gestor "1" --> "*" Cerradura : owns
+    Reserva "*" --> "1" Cerradura : opens
+    Huesped "*" -- "*" Reserva : guests
+    Reserva "1" *-- "*" Acceso : logs
+    Huesped "1" --> "*" Acceso : attempts
 ```
+
+<sub>Manager = <i>Gestor</i>, guest = <i>Huésped</i>, booking = <i>Reserva</i>, lock = <i>Cerradura</i>, access attempt = <i>Acceso</i> (entity names are in Spanish in the code).</sub>
 
 | Layer | Stack |
 |---|---|
