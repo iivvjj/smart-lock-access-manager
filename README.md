@@ -2,6 +2,10 @@
 
 A web platform for holiday-rental managers to give guests **keyless access** to their properties through internet-connected smart locks. Managers create bookings (by hand or imported from Google Calendar), and each guest can open the right doors only during their stay. Every access attempt is logged and monitored.
 
+![Demo: scheduling a booking, guest PIN access and notifications](docs/demo.gif)
+
+<sub>Recorded from our end-to-end Selenium tests running against the app.</sub>
+
 > Team project (5 people, Scrum) for a course at ETSIT, Universidad Politécnica de Madrid, Feb – May 2025.
 > This is my personal copy of the team repository, with the full commit history preserved and credentials removed.
 
@@ -11,7 +15,7 @@ A web platform for holiday-rental managers to give guests **keyless access** to 
 - **Google Calendar integration:** sign in with Google (OAuth 2.0), sync bookings to the manager's calendar and bulk-import them from `.ics` files.
 - **Guest access:** guests sign in and open their assigned door from the browser while the booking is active, with a simulated Bluetooth-proximity check.
 - **Access monitoring:** a log of every access attempt, plus an email to the manager on each access.
-- **Battery monitoring:** a scheduled job checks each lock's battery over WebSockets every 5 minutes, flags low levels and locks the door digitally when the battery is depleted.
+- **Battery monitoring:** a scheduled job checks each lock's battery over WebSockets every 5 minutes, shows low-battery alerts (below 15%) in the manager's notifications and locks the door digitally when the battery is depleted.
 - **Light/dark theme**, notifications and user settings.
 
 ## Architecture
